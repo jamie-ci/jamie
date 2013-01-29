@@ -114,8 +114,8 @@ Scenario: Running the init command without a Gemfile provides warning and fails
   When I run `jamie init` interactively
   And I type "y"
   And I type "jamie-vagrant"
-  And the output should contain "You do not have an existing Gemfile"
   Then the exit status should be 1
+  And the output should contain "You do not have an existing Gemfile"
 
 
 @ok
