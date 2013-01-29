@@ -3,6 +3,19 @@ Feature: Ensure that the Command Line Interface init creates the correct files
   As an Operator
   I want to initialize a cookbook
 
+Background:
+  Given a file named "metadata.rb" with:
+  """
+  name  "ntp"
+  license "Apache 2.0"
+  description "Installs and configures ntp as a client or server"
+  version "0.1.0"
+  recipe "ntp", "Installs and configures ntp either as a server or client"
+  %w{ ubuntu debian redhat centos fedora scientific amazon oracle freebsd }.each do |os|
+    supports os
+  end
+  """
+
 
 @ok
 Scenario: Basic init with no extras succeeds
@@ -47,7 +60,8 @@ Scenario: Basic init with no extras succeeds
     - recipe[yum::epel]
   suites:
   - name: default
-    run_list: []
+    run_list:
+    - recipe[ntp]
     attributes: {}
   """
   And a file named "Gemfile" should not exist
@@ -114,8 +128,8 @@ Scenario: Running the init command without a Gemfile provides warning and fails
   When I run `jamie init` interactively
   And I type "y"
   And I type "jamie-vagrant"
-  And the output should contain "You do not have an existing Gemfile"
   Then the exit status should be 1
+  And the output should contain "You do not have an existing Gemfile"
 
 
 @ok
@@ -132,28 +146,10 @@ Scenario: Running the init command succeeds
 
 
 @ok
-Scenario: Running init with a correct metadata.rb works
-  Given a file named "metadata.rb" with:
-  """
-  name              "ntp"
-  license           "Apache 2.0"
-  description       "Installs and configures ntp as a client or server"
-  version           "0.1.0"
-  recipe "ntp", "Installs and configures ntp either as a server or client"
-
-  %w{ ubuntu debian redhat centos fedora scientific amazon oracle freebsd }.each do |os|
-    supports os
-  end
-  """
+Scenario: Running init with an empty metadata.rb should fail/read the folder's name
+  Given an empty file named "metadata.rb"
   When I run `jamie init` interactively
   And I type "n"
-  Then the exit status should be 0
-  And the file ".jamie.yml" should contain:
-  """
-  suites:
-  - name: default
-    run_list:
-    - recipe[ntp]
-    attributes: {}
-  """
+  Then the exit status should be 1
+  And the output should contain "Could not determine the cookbook name"
 

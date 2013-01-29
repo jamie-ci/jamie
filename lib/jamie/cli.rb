@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 #
 # Author:: Fletcher Nichol (<fnichol@nichol.ca>)
+# Author:: Mike Fiedler (<miketheman@gmail.com>)
 #
 # Copyright (C) 2012, Fletcher Nichol
 #
@@ -300,6 +301,11 @@ module Jamie
         MetadataChopper.extract('metadata.rb').first
       else
         nil
+      end
+      if cookbook_name.nil?
+        warn %{Could not determine the cookbook name from metadata.rb}
+        warn %{Exiting...}
+        exit 1
       end
       run_list = cookbook_name ? "recipe[#{cookbook_name}]" : nil
 
