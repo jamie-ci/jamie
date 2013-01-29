@@ -57,41 +57,26 @@ Scenario: Basic init with no extras succeeds
 
 
 @ok
-Scenario: Running with a Rakefile file appends Jamie tasks
-  Given an empty file named "Rakefile"
+Scenario Outline: Jamie knows how to interact with other task frameworks
+  Given an empty file named "<Filename>"
   When I run `jamie init` interactively
   And I type "n"
   Then the exit status should be 0
-  And the file "Rakefile" should contain exactly:
+  And the file "<Filename>" should contain exactly:
   """
-  
+
   begin
-    require 'jamie/rake_tasks'
-    Jamie::RakeTasks.new
+    require 'jamie/<RequireName>'
+    Jamie::<TaskName>.new
   rescue LoadError
     puts ">>>>> Jamie gem not loaded, omitting tasks" unless ENV['CI']
   end
 
   """
-
-
-@ok
-Scenario: Running with a Thorfile file appends Jamie tasks
-  Given an empty file named "Thorfile"
-  When I run `jamie init` interactively
-  And I type "n"
-  Then the exit status should be 0
-  And the file "Thorfile" should contain exactly:
-  """
-  
-  begin
-    require 'jamie/thor_tasks'
-    Jamie::ThorTasks.new
-  rescue LoadError
-    puts ">>>>> Jamie gem not loaded, omitting tasks" unless ENV['CI']
-  end
-
-  """
+  Examples:
+    | Filename | RequireName | TaskName  |
+    | Rakefile | rake_tasks  | RakeTasks |
+    | Thorfile | thor_tasks  | ThorTasks |
 
 
 @ok
